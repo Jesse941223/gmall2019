@@ -1,6 +1,6 @@
 package com.jsfund.gmall2019.usermanage.controller;
 
-import com.jsfund.gmall2019.bean.UserInfo;
+import com.jsfund.gmall2019.UserInfo;
 import com.jsfund.gmall2019.usermanage.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
