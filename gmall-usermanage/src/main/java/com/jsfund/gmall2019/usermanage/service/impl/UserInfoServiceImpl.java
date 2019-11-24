@@ -1,9 +1,9 @@
 package com.jsfund.gmall2019.usermanage.service.impl;
 
-import com.jsfund.gmall2019.UserInfo;
+
+import com.jsfund.gmall2019.bean.UserInfo;
 import com.jsfund.gmall2019.usermanage.mapper.UserInfoMapper;
 import com.jsfund.gmall2019.usermanage.service.UserInfoService;
-import org.apache.ibatis.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
