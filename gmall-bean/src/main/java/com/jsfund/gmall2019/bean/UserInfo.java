@@ -1,4 +1,4 @@
-package com.jsfund.gmall2019;
+package com.jsfund.gmall2019.bean;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
