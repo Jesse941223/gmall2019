@@ -17,5 +17,7 @@ public interface UserInfoService {
     //通过id 查询用户信息
 
     UserInfo selectUserById(String id);
+    //模糊查询
+    List<UserInfo>  getUserinfoListByLike();
 
 }

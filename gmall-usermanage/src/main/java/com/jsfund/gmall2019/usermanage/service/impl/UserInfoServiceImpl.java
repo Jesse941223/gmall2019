@@ -1,13 +1,14 @@
 package com.jsfund.gmall2019.usermanage.service.impl;
 
 
+import com.alibaba.dubbo.config.annotation.Service;
 import com.jsfund.gmall2019.bean.UserInfo;
 import com.jsfund.gmall2019.usermanage.mapper.UserInfoMapper;
 import com.jsfund.gmall2019.usermanage.service.UserInfoService;
-import org.assertj.core.util.Strings;
-import org.omg.CORBA.SystemException;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+
+import tk.mybatis.mapper.entity.Example;
 
 import javax.persistence.Id;
 import java.util.List;
@@ -85,5 +86,18 @@ public class UserInfoServiceImpl implements UserInfoService {
 
         }
         return null;
+    }
+
+    /**
+     *  模糊查询
+     * @return
+     */
+    @Override
+    public List<UserInfo> getUserinfoListByLike() {
+        Example example = new Example(UserInfo.class);
+         example.createCriteria().andLike("loginName", "%a%");
+         //查询登录名称含a的所有用户信息
+        List<UserInfo> userInfos = userInfoMapper.selectByExample(example);
+        return userInfos;
     }
 }

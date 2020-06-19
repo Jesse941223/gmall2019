@@ -6,11 +6,11 @@ import java.io.Serializable;
 
 /**
  * @version 1.0
- * @ClassName UserAddress
+ * @ClassName UserAddress 用户地址
  * @Author jiajk
  * @Date 2019/11/24 20:02
  **/
-public class UserAddress implements Serializable {
+public class UserAddress  implements Serializable{
     @Column
     @Id
     private String id;

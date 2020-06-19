@@ -1,10 +1,11 @@
 package com.jsfund.gmall2019.usermanage.service.impl;
 
+import com.alibaba.dubbo.config.annotation.Service;
 import com.jsfund.gmall2019.bean.UserAddress;
 import com.jsfund.gmall2019.usermanage.mapper.UserAddressMapper;
 import com.jsfund.gmall2019.usermanage.service.UserAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
@@ -26,7 +27,6 @@ public class UserAddressServiceImpl implements UserAddressService{
         List<UserAddress> userAddresses = userAddressMapper.select(userAddress);
         if (userAddresses!=null&&userAddresses.size()>0) {
             return userAddresses;
-
         }
         return null;
     }
