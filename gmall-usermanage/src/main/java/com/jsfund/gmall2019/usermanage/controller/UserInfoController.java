@@ -2,9 +2,9 @@ package com.jsfund.gmall2019.usermanage.controller;
 
 import com.jsfund.gmall2019.bean.UserInfo;
 import com.jsfund.gmall2019.usermanage.service.UserInfoService;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -26,7 +26,10 @@ public class UserInfoController {
     @ResponseBody
     public List<UserInfo> findAll() {
         List<UserInfo> userInfoList = userInfoService.getUserInfoList();
-        return userInfoList;
+        if (CollectionUtils.isNotEmpty(userInfoList)) {
+            return userInfoList;
+        }
+        return null;
     }
     @RequestMapping("add")
     @ResponseBody
