@@ -80,7 +80,7 @@
                 <version>${mybatis.version}</version>
             </dependency>
 
-
+<!--页面松校验，解决页面中的单标签问题-->
             <dependency>
                 <groupId>net.sourceforge.nekohtml</groupId>
                 <artifactId>nekohtml</artifactId>
