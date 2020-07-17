@@ -1,9 +1,6 @@
 package com.jsfund.gmall2019.usermanage.service;
 
-import com.jsfund.gmall2019.bean.BaseAttrInfo;
-import com.jsfund.gmall2019.bean.BaseCatalog1;
-import com.jsfund.gmall2019.bean.BaseCatalog2;
-import com.jsfund.gmall2019.bean.BaseCatalog3;
+import com.jsfund.gmall2019.bean.*;
 
 import java.util.List;
 
@@ -27,4 +24,12 @@ public interface ManageService {
      * 通过catlog3Id获取平台属性列表
      */
     public List<BaseAttrInfo> getAttrList(String catalog3Id);
+
+    /**
+     * 保存平台属性，属性值
+     * @param baseAttrInfo
+     */
+    void saveAttrInfo(BaseAttrInfo baseAttrInfo);
+
+    List<BaseAttrValue> getAttrValueList(String attrId);
 }

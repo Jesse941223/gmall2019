@@ -1,22 +1,17 @@
 package com.jsfund.gmall2019.manage.service;
 
 import com.alibaba.dubbo.config.annotation.Service;
-import com.jsfund.gmall2019.bean.BaseAttrInfo;
-import com.jsfund.gmall2019.bean.BaseCatalog1;
-import com.jsfund.gmall2019.bean.BaseCatalog2;
-import com.jsfund.gmall2019.bean.BaseCatalog3;
-import com.jsfund.gmall2019.manage.mapper.BaseAttrInfoMapper;
-import com.jsfund.gmall2019.manage.mapper.BaseCatalog1Mapper;
-import com.jsfund.gmall2019.manage.mapper.BaseCatalog2Mapper;
-import com.jsfund.gmall2019.manage.mapper.BaseCatalog3Mapper;
+import com.jsfund.gmall2019.bean.*;
+import com.jsfund.gmall2019.manage.mapper.*;
 import com.jsfund.gmall2019.usermanage.service.ManageService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
+
 @Service
-public class manageServiceImpl implements ManageService{
+public class manageServiceImpl implements ManageService {
     @Autowired
     private BaseCatalog1Mapper baseCatalog1Mapper;
     @Autowired
@@ -25,8 +20,12 @@ public class manageServiceImpl implements ManageService{
     private BaseCatalog3Mapper baseCatalog3Mapper;
     @Autowired
     private BaseAttrInfoMapper baseAttrInfoMapper;
+    @Autowired
+    private BaseAttrValueMapper baseAttrValueMapper;
+
     /**
      * 获取一级分类列表
+     *
      * @return
      */
     @Override
@@ -52,9 +51,9 @@ public class manageServiceImpl implements ManageService{
     }
 
     @Override
-    public List<BaseCatalog3> getCatalog3(String catlog2id) {
+    public List<BaseCatalog3> getCatalog3(String catlog2Id) {
         BaseCatalog3 baseCatalog3 = new BaseCatalog3();
-        baseCatalog3.setCatalog2Id(catlog2id);
+        baseCatalog3.setCatalog2Id(catlog2Id);
         List<BaseCatalog3> baseCatalog3s = baseCatalog3Mapper.select(baseCatalog3);
         if (CollectionUtils.isNotEmpty(baseCatalog3s)) {
             return baseCatalog3s;
@@ -72,5 +71,54 @@ public class manageServiceImpl implements ManageService{
             return Collections.emptyList();
         }
         return baseAttrInfos;
+    }
+
+    /**
+     * 保存平台属性信息
+     *
+     * @param baseAttrInfo
+     */
+    @Override
+    public void saveAttrInfo(BaseAttrInfo baseAttrInfo) {
+        // 操作BaseAttrInfo
+        if (baseAttrInfo.getId()!=null && baseAttrInfo.getId().length()>0){
+            // 做修改
+            baseAttrInfoMapper.updateByPrimaryKeySelective(baseAttrInfo);
+        }else{
+            // 对应调用mapper对象进行新增
+            baseAttrInfo.setId(null); // 使id 实现自增
+            baseAttrInfoMapper.insertSelective(baseAttrInfo);
+        }
+
+        // 对属性值的操作BaseAttrValue
+        // 无论是新增，还是修改，先将BaseAttrValue 中 的数据删除 {baseAttrValue.attrId==baseAttrInfo.id}
+        BaseAttrValue baseAttrValue = new BaseAttrValue();
+        baseAttrValue.setAttrId(baseAttrInfo.getId());
+        baseAttrValueMapper.delete(baseAttrValue);
+
+        // 添加数据BaseAttrValue
+        List<BaseAttrValue> attrValueList = baseAttrInfo.getAttrValueList();
+        if (attrValueList!=null && attrValueList.size()>0){
+            // 循环遍历
+            for (BaseAttrValue attrValue : attrValueList) {
+                attrValue.setId(null);
+                attrValue.setAttrId(baseAttrInfo.getId());
+                baseAttrValueMapper.insertSelective(attrValue);
+            }
+        }
+    }
+
+    @Override
+    public List<BaseAttrValue> getAttrValueList(String attrId) {
+        if (attrId != null && attrId.length() > 0) {
+            BaseAttrValue baseAttrValue = new BaseAttrValue();
+            baseAttrValue.setAttrId(attrId);
+            List<BaseAttrValue> baseAttrValues = baseAttrValueMapper.select(baseAttrValue);
+            if (CollectionUtils.isNotEmpty(baseAttrValues)) {
+                return baseAttrValues;
+            }
+            return Collections.emptyList();
+        }
+        return null;
     }
 }

@@ -1,14 +1,13 @@
 package com.jsfund.gmall2019.manage;
 
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.jsfund.gmall2019.bean.BaseAttrInfo;
-import com.jsfund.gmall2019.bean.BaseCatalog1;
-import com.jsfund.gmall2019.bean.BaseCatalog2;
-import com.jsfund.gmall2019.bean.BaseCatalog3;
+import com.jsfund.gmall2019.bean.*;
+import com.jsfund.gmall2019.config.LoginRequire;
 import com.jsfund.gmall2019.usermanage.service.ManageService;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -60,6 +59,23 @@ public class ManageController {
     @ResponseBody
     public List<BaseAttrInfo> attrInfoList(@Param("catlog3Id") String catalog3Id){
         return manageService.getAttrList(catalog3Id);
+    }
+    /**
+     * 通过属性id 查询属性值列表
+     */
+    @RequestMapping("/getAttrValueList")
+    @ResponseBody
+    public List<BaseAttrValue> getAttrValueList (String attrId){
+        return manageService.getAttrValueList( attrId);
+    }
+    /**
+     * 保存平台属行，平台属性值
+     */
+    @RequestMapping("/saveAttrInfo")
+    @ResponseBody
+    //@LoginRequire(autoRedirect = true)
+    public void saveAttrInfo(@RequestBody BaseAttrInfo baseAttrInfo){
+        manageService.saveAttrInfo(baseAttrInfo);
     }
 
 }
