@@ -32,4 +32,12 @@ public interface ManageService {
     void saveAttrInfo(BaseAttrInfo baseAttrInfo);
 
     List<BaseAttrValue> getAttrValueList(String attrId);
+
+    /**
+     * 通过属性id查询平台属性
+     * @param attrId
+     * @return
+     */
+
+    BaseAttrInfo getAttrInfo(String attrId);
 }

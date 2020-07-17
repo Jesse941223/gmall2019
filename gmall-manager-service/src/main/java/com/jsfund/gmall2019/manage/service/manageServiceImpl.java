@@ -121,4 +121,21 @@ public class manageServiceImpl implements ManageService {
         }
         return null;
     }
+
+    /**
+     * 根据属性id 查平台属性
+     * @param attrId
+     * @return
+     */
+    @Override
+    public BaseAttrInfo getAttrInfo(String attrId) {
+        BaseAttrInfo baseAttrInfo = baseAttrInfoMapper.selectByPrimaryKey(attrId);
+        //为平台属性值列表赋值
+        BaseAttrValue baseAttrValue = new BaseAttrValue();
+        baseAttrValue.setAttrId(baseAttrInfo.getId());
+        List<BaseAttrValue> baseAttrValues = baseAttrValueMapper.select(baseAttrValue);
+        // 给平台属性值集合赋值
+        baseAttrInfo.setAttrValueList(baseAttrValues);
+        return baseAttrInfo;
+    }
 }

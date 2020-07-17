@@ -66,7 +66,9 @@ public class ManageController {
     @RequestMapping("/getAttrValueList")
     @ResponseBody
     public List<BaseAttrValue> getAttrValueList (String attrId){
-        return manageService.getAttrValueList( attrId);
+        //return manageService.getAttrValueList( attrId);
+        BaseAttrInfo baseAttrInfo = manageService.getAttrInfo(attrId);
+        return baseAttrInfo.getAttrValueList();
     }
     /**
      * 保存平台属行，平台属性值
