@@ -22,6 +22,8 @@ public class manageServiceImpl implements ManageService {
     private BaseAttrInfoMapper baseAttrInfoMapper;
     @Autowired
     private BaseAttrValueMapper baseAttrValueMapper;
+    @Autowired
+    private SpuInfoMapper spuInfoMapper;
 
     /**
      * 获取一级分类列表
@@ -108,6 +110,11 @@ public class manageServiceImpl implements ManageService {
         }
     }
 
+    /**
+     * 通过属性id 查询属性集合
+     * @param attrId
+     * @return
+     */
     @Override
     public List<BaseAttrValue> getAttrValueList(String attrId) {
         if (attrId != null && attrId.length() > 0) {
@@ -137,5 +144,21 @@ public class manageServiceImpl implements ManageService {
         // 给平台属性值集合赋值
         baseAttrInfo.setAttrValueList(baseAttrValues);
         return baseAttrInfo;
+    }
+
+    /**
+     * 通过分类id查询商品集合
+     * @param catalog3Id
+     * @return
+     */
+    @Override
+    public List<SpuInfo> getSpuList(String catalog3Id) {
+        SpuInfo spuInfo = new SpuInfo();
+        spuInfo.setCatalog3Id(catalog3Id);
+        List<SpuInfo> spuInfoList = spuInfoMapper.select(spuInfo);
+        if (CollectionUtils.isNotEmpty(spuInfoList)) {
+            return spuInfoList;
+        }
+        return Collections.emptyList();
     }
 }

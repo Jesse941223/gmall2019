@@ -80,4 +80,5 @@ public class ManageController {
         manageService.saveAttrInfo(baseAttrInfo);
     }
 
+
 }

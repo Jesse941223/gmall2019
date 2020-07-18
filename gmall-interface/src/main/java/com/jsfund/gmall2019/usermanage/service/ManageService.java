@@ -40,4 +40,11 @@ public interface ManageService {
      */
 
     BaseAttrInfo getAttrInfo(String attrId);
+
+    /**
+     * 通过分类id查询商品列表
+     * @param cataLog3Id
+     * @return
+     */
+    List<SpuInfo> getSpuList(String cataLog3Id);
 }
