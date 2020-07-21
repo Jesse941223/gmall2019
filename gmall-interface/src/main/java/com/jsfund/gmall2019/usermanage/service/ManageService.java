@@ -20,10 +20,11 @@ public interface ManageService {
      * 通过catlog3Id 获取三级分类列表
      */
     public List<BaseCatalog3> getCatalog3(String catalog2id);
+
     /**
      * 通过catlog3Id获取平台属性列表
      */
-    public List<BaseAttrInfo> getAttrList(String catalog3Id);
+    public List<BaseAttrInfo> getAttrInfoList(String catalog3Id);
 
     /**
      * 保存平台属性，属性值
@@ -47,4 +48,22 @@ public interface ManageService {
      * @return
      */
     List<SpuInfo> getSpuList(String cataLog3Id);
+    /**
+     * 查询所有的销售属性列表
+     *
+     */
+    List<BaseSaleAttr> getSaleAttrList();
+
+    /**
+     *保存商品
+     * @param spuInfo
+     */
+
+    void saveSpuInfo(SpuInfo spuInfo);
+
+    List<SpuSaleAttr> getSpuSaleAttrList(String spuId);
+
+    List<SpuImage> getSpuImageList(String spuId);
+
+    void saveSkuInfo(SkuInfo skuInfo);
 }

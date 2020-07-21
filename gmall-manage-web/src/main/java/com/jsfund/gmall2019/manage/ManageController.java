@@ -49,17 +49,6 @@ public class ManageController {
     public List<BaseCatalog3> getCatalog3(@Param("catlog2Id") String catalog2Id){
         return manageService.getCatalog3(catalog2Id);
     }
-
-    /**
-     * 根据catlog3Id 获取平台属性列表
-     * @param catalog3Id
-     * @return
-     */
-    @RequestMapping("/attrInfoList")
-    @ResponseBody
-    public List<BaseAttrInfo> attrInfoList(@Param("catlog3Id") String catalog3Id){
-        return manageService.getAttrList(catalog3Id);
-    }
     /**
      * 通过属性id 查询属性值列表
      */

@@ -11,6 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -40,5 +43,15 @@ public class GmallManagerWebApplicationTests {
 //			s = group1
 //          s = M00/00/00/wKjCgF8TDY-AVnLfAACbuutfIxI335.jpg
         }
+    }
+    /**
+     * dataTime 练习
+     */
+    @Test
+    public void test2(){
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String format = now.format(yyyyMMdd);
+        System.out.println(format);
     }
 }

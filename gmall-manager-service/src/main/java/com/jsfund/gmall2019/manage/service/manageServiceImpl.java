@@ -5,6 +5,8 @@ import com.jsfund.gmall2019.bean.*;
 import com.jsfund.gmall2019.manage.mapper.*;
 import com.jsfund.gmall2019.usermanage.service.ManageService;
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -12,6 +14,7 @@ import java.util.List;
 
 @Service
 public class manageServiceImpl implements ManageService {
+    private static final Logger LOG = LoggerFactory.getLogger(manageServiceImpl.class);
     @Autowired
     private BaseCatalog1Mapper baseCatalog1Mapper;
     @Autowired
@@ -24,6 +27,22 @@ public class manageServiceImpl implements ManageService {
     private BaseAttrValueMapper baseAttrValueMapper;
     @Autowired
     private SpuInfoMapper spuInfoMapper;
+    @Autowired
+    private BaseSaleAttrMapper baseSaleAttrMapper;
+    @Autowired
+    private SpuImageMapper spuImageMapper;
+    @Autowired
+    private SpuSaleAttrMapper spuSaleAttrMapper;
+    @Autowired
+    private SpuSaleAttrValueMapper spuSaleAttrValueMapper;
+    @Autowired
+    private SkuInfoMapper skuInfoMapper;
+    @Autowired
+    private SkuImageMapper skuImageMapper;
+    @Autowired
+    private SkuSaleAtrrValueMapper skuSaleAtrrValueMapper;
+    @Autowired
+    private SkuAttrValueMapper skuAttrValueMapper;
 
     /**
      * 获取一级分类列表
@@ -63,16 +82,15 @@ public class manageServiceImpl implements ManageService {
         return Collections.emptyList();
     }
 
+    /**
+     * 通过三级分类id 查询平台属性，属性值集合
+     *
+     * @param catlog3Id 改造后的方法实现
+     * @return
+     */
     @Override
-    public List<BaseAttrInfo> getAttrList(String catlog3Id) {
-        BaseAttrInfo baseAttrInfo = new BaseAttrInfo();
-        baseAttrInfo.setCatalog3Id(catlog3Id);
-        List<BaseAttrInfo> baseAttrInfos = baseAttrInfoMapper.select(baseAttrInfo);
-        if (CollectionUtils.isEmpty(baseAttrInfos)) {
-            //如果不存在返回空集合
-            return Collections.emptyList();
-        }
-        return baseAttrInfos;
+    public List<BaseAttrInfo> getAttrInfoList(String catlog3Id) {
+        return baseAttrInfoMapper.getBaseAttrInfoListByCatalog3Id(Long.parseLong(catlog3Id));
     }
 
     /**
@@ -83,10 +101,10 @@ public class manageServiceImpl implements ManageService {
     @Override
     public void saveAttrInfo(BaseAttrInfo baseAttrInfo) {
         // 操作BaseAttrInfo
-        if (baseAttrInfo.getId()!=null && baseAttrInfo.getId().length()>0){
+        if (baseAttrInfo.getId() != null && baseAttrInfo.getId().length() > 0) {
             // 做修改
             baseAttrInfoMapper.updateByPrimaryKeySelective(baseAttrInfo);
-        }else{
+        } else {
             // 对应调用mapper对象进行新增
             baseAttrInfo.setId(null); // 使id 实现自增
             baseAttrInfoMapper.insertSelective(baseAttrInfo);
@@ -100,7 +118,7 @@ public class manageServiceImpl implements ManageService {
 
         // 添加数据BaseAttrValue
         List<BaseAttrValue> attrValueList = baseAttrInfo.getAttrValueList();
-        if (attrValueList!=null && attrValueList.size()>0){
+        if (attrValueList != null && attrValueList.size() > 0) {
             // 循环遍历
             for (BaseAttrValue attrValue : attrValueList) {
                 attrValue.setId(null);
@@ -112,6 +130,7 @@ public class manageServiceImpl implements ManageService {
 
     /**
      * 通过属性id 查询属性集合
+     *
      * @param attrId
      * @return
      */
@@ -131,6 +150,7 @@ public class manageServiceImpl implements ManageService {
 
     /**
      * 根据属性id 查平台属性
+     *
      * @param attrId
      * @return
      */
@@ -148,6 +168,7 @@ public class manageServiceImpl implements ManageService {
 
     /**
      * 通过分类id查询商品集合
+     *
      * @param catalog3Id
      * @return
      */
@@ -161,4 +182,155 @@ public class manageServiceImpl implements ManageService {
         }
         return Collections.emptyList();
     }
+
+    @Override
+    public List<BaseSaleAttr> getSaleAttrList() {
+        LOG.info("查询所有销售属性集合信息，开始查询");
+        List<BaseSaleAttr> baseSaleAttrs = baseSaleAttrMapper.selectAll();
+        if (CollectionUtils.isNotEmpty(baseSaleAttrs)) {
+            return baseSaleAttrs;
+        }
+        //如果没有值，返回空集合
+        return Collections.emptyList();
+    }
+
+    /**
+     * 保存商品
+     *
+     * @param spuInfo
+     */
+    @Override
+    public void saveSpuInfo(SpuInfo spuInfo) {
+        if (spuInfo.getId() == null || spuInfo.getId().length() == 0) {
+            //保存数据
+            spuInfo.setId(null);
+            spuInfoMapper.insertSelective(spuInfo);
+        } else {
+            //更新操作
+            spuInfoMapper.updateByPrimaryKeySelective(spuInfo);
+        }
+        // 保存图片前先删除图片
+        SpuImage spuImage = new SpuImage();
+        spuImage.setSpuId(spuInfo.getId());
+        spuImageMapper.delete(spuImage);
+        List<SpuImage> spuImageList = spuInfo.getSpuImageList();
+        if (spuImageList != null && spuImageList.size() > 0) {
+            for (SpuImage image : spuImageList) {
+                image.setId(null);
+                image.setSpuId(spuInfo.getId());
+                spuImageMapper.insertSelective(image);
+            }
+        }
+        //获取数据
+        List<SpuSaleAttr> spuSaleAttrList = spuInfo.getSpuSaleAttrList();
+        if (spuSaleAttrList != null && spuSaleAttrList.size() > 0) {
+            for (SpuSaleAttr spuSaleAttr : spuSaleAttrList) {
+                spuSaleAttr.setId(null);
+                spuSaleAttr.setSpuId(spuInfo.getId());
+                spuSaleAttrMapper.insertSelective(spuSaleAttr);
+
+                //添加平台属性值
+                List<SpuSaleAttrValue> spuSaleAttrValueList = spuSaleAttr.getSpuSaleAttrValueList();
+                if (spuSaleAttrValueList != null && spuSaleAttrValueList.size() > 0) {
+                    for (SpuSaleAttrValue spuSaleAttrValue : spuSaleAttrValueList) {
+                        spuSaleAttrValue.setId(null);
+                        spuSaleAttrValue.setSpuId(spuInfo.getId());
+                        spuSaleAttrValueMapper.insertSelective(spuSaleAttrValue);
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    /**
+     * 查询商品销售属性集合
+     * 通过改造，关联外表进行多表查询
+     *
+     * @param spuId
+     * @return
+     */
+
+    @Override
+    public List<SpuSaleAttr> getSpuSaleAttrList(String spuId) {
+        List<SpuSaleAttr> spuSaleAttrs = spuSaleAttrMapper.selectSpuSaleAttrList(Long.parseLong(spuId));
+        if (CollectionUtils.isNotEmpty(spuSaleAttrs)) {
+            return spuSaleAttrs;
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * 通过商品id 获取图片集合
+     *
+     * @param spuId
+     * @return
+     */
+    @Override
+    public List<SpuImage> getSpuImageList(String spuId) {
+        if (spuId != null && spuId.length() > 0) {
+            SpuImage spuImage = new SpuImage();
+            spuImage.setSpuId(spuId);
+            List<SpuImage> spuImages = spuImageMapper.select(spuImage);
+            if (CollectionUtils.isNotEmpty(spuImages)) {
+                return spuImages;
+            }
+            // 如果返回空集合
+            return Collections.emptyList();
+        }
+        return null;
+    }
+
+    /**
+     * 保存sku信息数据
+     *
+     * @param skuInfo
+     */
+    @Override
+    public void saveSkuInfo(SkuInfo skuInfo) {
+        //保存skuInfo信息
+        if (skuInfo.getId() == null || skuInfo.getId().length() == 0) {
+            skuInfoMapper.insertSelective(skuInfo);
+        } else {
+            skuInfoMapper.updateByPrimaryKeySelective(skuInfo);
+        }
+        //保存前先删除数据
+        SkuImage skuImage = new SkuImage();
+        skuImage.setSkuId(skuInfo.getId());
+        skuImageMapper.delete(skuImage);
+
+        List<SkuImage> skuImageList = skuInfo.getSkuImageList();
+        if (null != skuImageList && skuImageList.size() > 0) {
+            for (SkuImage image : skuImageList) {
+                image.setId(null);
+                image.setSkuId(skuInfo.getId());
+                //保存sku 图片
+                skuImageMapper.insertSelective(image);
+            }
+        }
+        //保存平台属性
+        List<SkuAttrValue> skuAttrValueList = skuInfo.getSkuAttrValueList();
+        if (skuAttrValueList != null && skuAttrValueList.size() > 0) {
+            for (SkuAttrValue skuAttrValue : skuAttrValueList) {
+                skuAttrValue.setId(null);
+                skuAttrValue.setSkuId(skuInfo.getId());
+                //保存平台属性的关联
+                skuAttrValueMapper.insertSelective(skuAttrValue);
+            }
+        }
+        //保存销售属性值
+        List<SkuSaleAttrValue> skuSaleAttrValueList = skuInfo.getSkuSaleAttrValueList();
+        if (null != skuSaleAttrValueList && skuSaleAttrValueList.size() > 0) {
+            for (SkuSaleAttrValue skuSaleAttrValue : skuSaleAttrValueList) {
+                skuSaleAttrValue.setId(null);
+                skuSaleAttrValue.setSkuId(skuInfo.getId());
+                skuSaleAtrrValueMapper.insertSelective(skuSaleAttrValue);
+            }
+        }
+
+
+    }
+
+
 }
