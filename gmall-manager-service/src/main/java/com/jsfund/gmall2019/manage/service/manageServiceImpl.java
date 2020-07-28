@@ -332,5 +332,39 @@ public class manageServiceImpl implements ManageService {
 
     }
 
+    /**
+     * 通过skuId 查询商品信息
+     */
+    @Override
+    public SkuInfo getSkuInfo(String skuId) {
+        SkuInfo skuInfo = skuInfoMapper.selectByPrimaryKey(skuId);
+        //通过skuid 查询skuImageList 然后赋值
+        SkuImage skuImage = new SkuImage();
+        skuImage.setSkuId(skuId);
+        List<SkuImage> skuImages = skuImageMapper.select(skuImage);
+        skuInfo.setSkuImageList(skuImages);
+        return skuInfo;
+    }
+
+    /**
+     * 通过skuId 查询spu 的销售属性
+     * @return
+     */
+    @Override
+    public List<SpuSaleAttr> selectSpuSaleAttrListCheckBySku(SkuInfo skuInfo) {
+        return spuSaleAttrMapper.selectSpuSaleAttrListCheckBySku(skuInfo.getId(), skuInfo.getSpuId());
+
+    }
+
+    /**
+     *  通过spuId 查询skuSaleAttrValue的集合
+     * @param spuId
+     * @return
+     */
+    @Override
+    public List<SkuSaleAttrValue> getSkuSaleAttrValueListBySpu(String spuId) {
+
+        return skuSaleAtrrValueMapper.getSkuSaleAttrValueListBySpu(spuId);
+    }
 
 }
