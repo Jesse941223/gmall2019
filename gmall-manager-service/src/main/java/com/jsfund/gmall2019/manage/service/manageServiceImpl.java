@@ -348,27 +348,32 @@ public class manageServiceImpl implements ManageService {
 //        jedis.set("k1","就是不会！");
 //        jedis.close();
         Jedis jedis = redisUtil.getJedis();
-        //声明存储的商品的key
-        String skuKey = ManageConst.SKUKEY_PREFIX + skuId + ManageConst.SKUKEY_SUFFIX;
-        if (jedis.exists(skuKey)) {
-            //key存在，则取出key中的数据
-            String skuJson = jedis.get(skuKey);
-            if (skuJson != null && skuJson.length() > 0) {
-                //将json转换成skuInfo 对象
-                SkuInfo skuInfo = JSON.parseObject(skuJson, SkuInfo.class);
-                return skuInfo;
+        try {
+            //声明存储的商品的key
+            String skuKey = ManageConst.SKUKEY_PREFIX + skuId + ManageConst.SKUKEY_SUFFIX;
+            if (jedis.exists(skuKey)) {
+                //key存在，则取出key中的数据
+                String skuJson = jedis.get(skuKey);
+                if (skuJson != null && skuJson.length() > 0) {
+                    //将json转换成skuInfo 对象
+                    SkuInfo skuInfo = JSON.parseObject(skuJson, SkuInfo.class);
+                    return skuInfo;
+                }
+            } else {
+                //如果不存在，从 数据库中取数据
+                SkuInfo skuInfoDB = getSkuInfoDB(skuId);
+                //将数据放入redis中
+                // jedis.set(skuKey,JSON.toJSONString(skuInfoDB));
+                //存入到redis中，设置过期时间的24*60*60
+                jedis.setex(skuKey,ManageConst.SKUKEY_TIMEOUT,JSON.toJSONString(skuInfoDB));
+                return skuInfoDB;
             }
-        } else {
-            //如果不存在，从 数据库中取数据
-            SkuInfo skuInfoDB = getSkuInfoDB(skuId);
-            //将数据放入redis中
-            // jedis.set(skuKey,JSON.toJSONString(skuInfoDB));
-            //存入到redis中，设置过期时间的24*60*60
-            jedis.setex(skuKey,ManageConst.SKUKEY_TIMEOUT,JSON.toJSONString(skuInfoDB));
-            return skuInfoDB;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         jedis.close();
-        return null;
+        //如果有错误代码块直接通过skuId 去取
+        return getSkuInfoDB(skuId);
     }
     /**
      * 从数据库中获取数据
