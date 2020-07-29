@@ -1,13 +1,17 @@
 package com.jsfund.gmall2019.manage.service;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.jsfund.gmall2019.bean.*;
+import com.jsfund.gmall2019.config.RedisUtil;
+import com.jsfund.gmall2019.manage.constant.ManageConst;
 import com.jsfund.gmall2019.manage.mapper.*;
 import com.jsfund.gmall2019.usermanage.service.ManageService;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import redis.clients.jedis.Jedis;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +47,8 @@ public class manageServiceImpl implements ManageService {
     private SkuSaleAtrrValueMapper skuSaleAtrrValueMapper;
     @Autowired
     private SkuAttrValueMapper skuAttrValueMapper;
+    @Autowired
+    private RedisUtil redisUtil;
 
     /**
      * 获取一级分类列表
@@ -337,6 +343,39 @@ public class manageServiceImpl implements ManageService {
      */
     @Override
     public SkuInfo getSkuInfo(String skuId) {
+        //测试一下Redis是否可用
+//        Jedis jedis = redisUtil.getJedis();
+//        jedis.set("k1","就是不会！");
+//        jedis.close();
+        Jedis jedis = redisUtil.getJedis();
+        //声明存储的商品的key
+        String skuKey = ManageConst.SKUKEY_PREFIX + skuId + ManageConst.SKUKEY_SUFFIX;
+        if (jedis.exists(skuKey)) {
+            //key存在，则取出key中的数据
+            String skuJson = jedis.get(skuKey);
+            if (skuJson != null && skuJson.length() > 0) {
+                //将json转换成skuInfo 对象
+                SkuInfo skuInfo = JSON.parseObject(skuJson, SkuInfo.class);
+                return skuInfo;
+            }
+        } else {
+            //如果不存在，从 数据库中取数据
+            SkuInfo skuInfoDB = getSkuInfoDB(skuId);
+            //将数据放入redis中
+            // jedis.set(skuKey,JSON.toJSONString(skuInfoDB));
+            //存入到redis中，设置过期时间的24*60*60
+            jedis.setex(skuKey,ManageConst.SKUKEY_TIMEOUT,JSON.toJSONString(skuInfoDB));
+            return skuInfoDB;
+        }
+        jedis.close();
+        return null;
+    }
+    /**
+     * 从数据库中获取数据
+     * @param skuId
+     * @return
+     */
+    private SkuInfo getSkuInfoDB(String skuId) {
         SkuInfo skuInfo = skuInfoMapper.selectByPrimaryKey(skuId);
         //通过skuid 查询skuImageList 然后赋值
         SkuImage skuImage = new SkuImage();
