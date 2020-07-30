@@ -343,36 +343,76 @@ public class manageServiceImpl implements ManageService {
      */
     @Override
     public SkuInfo getSkuInfo(String skuId) {
-        //测试一下Redis是否可用
-//        Jedis jedis = redisUtil.getJedis();
-//        jedis.set("k1","就是不会！");
-//        jedis.close();
-        Jedis jedis = redisUtil.getJedis();
-        try {
-            //声明存储的商品的key
-            String skuKey = ManageConst.SKUKEY_PREFIX + skuId + ManageConst.SKUKEY_SUFFIX;
-            if (jedis.exists(skuKey)) {
-                //key存在，则取出key中的数据
-                String skuJson = jedis.get(skuKey);
-                if (skuJson != null && skuJson.length() > 0) {
-                    //将json转换成skuInfo 对象
-                    SkuInfo skuInfo = JSON.parseObject(skuJson, SkuInfo.class);
-                    return skuInfo;
-                }
-            } else {
-                //如果不存在，从 数据库中取数据
-                SkuInfo skuInfoDB = getSkuInfoDB(skuId);
-                //将数据放入redis中
-                // jedis.set(skuKey,JSON.toJSONString(skuInfoDB));
-                //存入到redis中，设置过期时间的24*60*60
-                jedis.setex(skuKey,ManageConst.SKUKEY_TIMEOUT,JSON.toJSONString(skuInfoDB));
-                return skuInfoDB;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        jedis.close();
-        //如果有错误代码块直接通过skuId 去取
+//        //测试一下Redis是否可用
+//////        Jedis jedis = redisUtil.getJedis();
+//////        jedis.set("k1","就是不会！");
+//////        jedis.close();
+////        Jedis jedis = redisUtil.getJedis();
+////        try {
+////            //声明存储的商品的key
+////            String skuKey = ManageConst.SKUKEY_PREFIX + skuId + ManageConst.SKUKEY_SUFFIX;
+////            if (jedis.exists(skuKey)) {
+////                //key存在，则取出key中的数据
+////                String skuJson = jedis.get(skuKey);
+////                if (skuJson != null && skuJson.length() > 0) {
+////                    //将json转换成skuInfo 对象
+////                    SkuInfo skuInfo = JSON.parseObject(skuJson, SkuInfo.class);
+////                    return skuInfo;
+////                }
+////            } else {
+////                //如果不存在，从 数据库中取数据
+////                SkuInfo skuInfoDB = getSkuInfoDB(skuId);
+////                //将数据放入redis中
+////                // jedis.set(skuKey,JSON.toJSONString(skuInfoDB));
+////                //存入到redis中，设置过期时间的24*60*60
+////                jedis.setex(skuKey,ManageConst.SKUKEY_TIMEOUT,JSON.toJSONString(skuInfoDB));
+////                return skuInfoDB;
+////            }
+////        } catch (Exception e) {
+////            e.printStackTrace();
+////        }
+////        jedis.close();
+////        //如果有错误代码块直接通过skuId 去取
+////        return getSkuInfoDB(skuId);
+        //代码重构
+         try {
+             // 获取jedis
+             Jedis jedis = redisUtil.getJedis();
+             //定义一个key
+             String skuKye = ManageConst.SKUKEY_PREFIX+skuId+ManageConst.SKUKEY_SUFFIX;
+             //查询缓存数据库
+             String skuJson = jedis.get(skuKye);
+             if (skuJson == null || skuJson.length() == 0) {
+                 LOG.info("缓存中没有数据");
+                 //定义一个分布式锁的key
+                 String skuLockKey = ManageConst.SKUKEY_PREFIX + skuId + ManageConst.SKULOCK_SUFFIX;
+                 //执行完set命令返回的结果
+                 String lockKey = jedis.set(skuLockKey, "OK", "NX", "PX", ManageConst.SKULOCK_EXPIRE_PX);
+                 if ("OK".equals(lockKey)) {
+                     //设置分布式锁
+                     LOG.info("获取分布式锁");
+                     //从数据库中取数据
+                     SkuInfo skuInfoDB = getSkuInfoDB(skuId);
+                     //将redis放入缓存中
+                     //带过期时间的
+                     jedis.setex(skuKye, ManageConst.SKUKEY_TIMEOUT, JSON.toJSONString(skuInfoDB));
+                     return skuInfoDB;
+                 } else {
+                     //其他人应该等待
+                     Thread.sleep(1000);
+                     //继续查询
+                     getSkuInfo(skuId);
+                 }
+                 //命中key
+             }else {
+                 //有缓存
+                 SkuInfo skuInfo = JSON.parseObject(skuJson, SkuInfo.class);
+                 return skuInfo;
+             }
+         }catch (Exception e){
+             e.printStackTrace();
+         }
+         //如果数据库宕机，查询数据库
         return getSkuInfoDB(skuId);
     }
     /**
