@@ -5,10 +5,10 @@ import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class GmallUsermanageApplicationTests {
+public class GmallUsermanageApplicationTests {
 
     @Test
-    void contextLoads() {
+    public void contextLoads() {
     }
 
 
